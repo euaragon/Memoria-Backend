@@ -5,41 +5,56 @@ using MemoriaAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("MemoriaDB");
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-try
+
+builder.Services.AddCors(options =>
 {
-    using (SqlConnection connection = new SqlConnection(connectionString))
-    {
-        connection.Open();
-        Console.WriteLine("Conexion exitosa a la base de datos.");
-    }
-}
-catch (Exception ex)
-{
-    Console.WriteLine("Error al conectar a la base de datos: " + ex.Message);
-    builder.Logging.AddConsole(); 
-    var logger = builder.Build().Services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "Error de conexion a la base de datos");
-    throw new Exception("Error de conexion a la base de datos: " + ex.Message); 
-}
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:7111")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 
-builder.Services.AddDbContext<MemoriaDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("MemoriaDB")));
+var connectionString = builder.Configuration.GetConnectionString("FallosDb");
 
+builder.Services.AddDbContext<MemoriaDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+try
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            logger.LogInformation("✅ Conexión exitosa a la base de datos.");
+        }
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine("❌ Error al conectar a la base de datos: " + ex.Message);
+    throw;
+}
+
+// Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -47,6 +62,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseCors(MyAllowSpecificOrigins); 
 
 app.UseAuthorization();
 

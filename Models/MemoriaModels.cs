@@ -5,6 +5,66 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MemoriaAPI.Models
 {
+
+
+    public class FiltroFallos
+    {
+        public string? DigNumeroDesde { get; set; }
+        public int? EntIdApl { get; set; }
+        public string? Keyword { get; set; }
+        public int? Anio { get; set; } = 2024;
+        public int? DigAgrId { get; set; }
+    }
+
+
+
+    public class ResultadoDigesto
+    {
+        public int DigId { get; set; }
+        public string TipNorNombre { get; set; }
+        public string DigNumero { get; set; }
+        public string EntRazonSocial { get; set; }
+        public int TipNorId { get; set; }
+        public int EntId { get; set; }
+        public DateTime? DigFEmision { get; set; }
+        public DateTime? DigFPublicacion { get; set; }
+        public DateTime? DigFVigencia { get; set; }
+        public string DigExtracto { get; set; }
+        public string AplDigNombre { get; set; }
+        public bool DigModificada { get; set; }
+        public bool DigDerogada { get; set; }
+        public bool DigSeleccion { get; set; }
+        public bool DigInternet { get; set; }
+        public string ArcDigNombre { get; set; }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public class Pagina
     {
         [Key]
