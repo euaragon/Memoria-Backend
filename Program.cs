@@ -1,6 +1,5 @@
 ﻿// Program.cs de la API
 
-using MemoriaAPI.Models;
 using MemoriaAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
@@ -16,7 +15,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://localhost:7111")
+            policy.WithOrigins("https://192.168.237.187:4435")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -54,12 +53,9 @@ catch (Exception ex)
     throw;
 }
 
-// Middleware
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
