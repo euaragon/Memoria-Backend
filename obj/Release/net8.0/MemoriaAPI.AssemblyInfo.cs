@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MemoriaAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c4832558c3aa57c50b242ab7a11a78500b081b91")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9a309c049cb9f0255a583d02a306701382724747")]
 [assembly: System.Reflection.AssemblyProductAttribute("MemoriaAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MemoriaAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -3,6 +3,10 @@
 using MemoriaAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using MemoriaAPI.Models;
+using NSwag;
+using NSwag.Generation.Processors.Security;
+using Microsoft.AspNetCore.Builder;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,8 +19,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://192.168.237.187:4435")
-                  .AllowAnyHeader()
+            policy.WithOrigins("http://192.168.237.187:5010", "https://192.168.237.187:4435", "https://localhost:7111")
+                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
 });
@@ -27,10 +31,26 @@ var connectionString = builder.Configuration.GetConnectionString("FallosDb");
 builder.Services.AddDbContext<MemoriaDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.Configure<ApiConfiguration>(builder.Configuration.GetSection("ApiConfiguration"));
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddOpenApiDocument(config =>
+{
+    config.Title = "Fallos Memoria 2024";
+    config.Version = "v1";
+    config.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+    {
+        Type = OpenApiSecuritySchemeType.ApiKey,
+        Name = "Authorization",
+        In = OpenApiSecurityApiKeyLocation.Header,
+        Description = "Introduce el token JWT con el formato: Bearer {token}"
+    });
+
+    config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
+});
 
 var app = builder.Build();
 
@@ -54,12 +74,16 @@ catch (Exception ex)
 }
 
 
-app.UseSwagger();
-app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
+
 app.UseRouting();
+
+app.UseOpenApi(); // Sirve /swagger/v1/swagger.json
+app.UseSwaggerUi(); // Sirve el UI en /swagger
 
 app.UseCors(MyAllowSpecificOrigins); 
 

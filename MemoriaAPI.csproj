@@ -1,25 +1,44 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.66" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.13">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.13">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.1.66" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.13">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.13" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.13">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="NSwag.AspNetCore" Version="14.4.0" />
+	</ItemGroup>
+
+	<Target Name="RemoveLocalizationFolders" AfterTargets="Publish">
+		<ItemGroup>
+			<LocalizationFolders Include="$(PublishDir)cs\**" />
+			<LocalizationFolders Include="$(PublishDir)es\**" />
+			<LocalizationFolders Include="$(PublishDir)fr\**" />
+			<LocalizationFolders Include="$(PublishDir)it\**" />
+			<LocalizationFolders Include="$(PublishDir)ja\**" />
+			<LocalizationFolders Include="$(PublishDir)ko\**" />
+			<LocalizationFolders Include="$(PublishDir)pl\**" />
+			<LocalizationFolders Include="$(PublishDir)pt-BR\**" />
+			<LocalizationFolders Include="$(PublishDir)ru\**" />
+			<LocalizationFolders Include="$(PublishDir)tr\**" />
+			<LocalizationFolders Include="$(PublishDir)zh-Hans\**" />
+			<LocalizationFolders Include="$(PublishDir)zh-Hant\**" />
+		</ItemGroup>
+		<Delete Files="@(LocalizationFolders)" />
+		<RemoveDir Directories="@(LocalizationFolders->'%(RootDir)%(Directory)')" />
+	</Target>
 
 </Project>
