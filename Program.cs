@@ -7,6 +7,7 @@ using MemoriaAPI.Models;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Microsoft.AspNetCore.Builder;
+using MemoriaAPI.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://192.168.237.187:5010", "https://192.168.237.187:4435", "https://localhost:7111")
+            policy.WithOrigins("http://192.168.237.187:5010", "https://192.168.237.187:4435", "https://localhost", "https://webprueba", "https://www.tribcuentasmendoza.gob.ar")
                    .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -35,6 +36,9 @@ builder.Services.Configure<ApiConfiguration>(builder.Configuration.GetSection("A
 
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<IFallosService, FallosService>();
+builder.Services.AddScoped<IConfiguracionService, ConfiguracionService>();
+builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddOpenApiDocument(config =>
@@ -82,8 +86,15 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseOpenApi(); // Sirve /swagger/v1/swagger.json
-app.UseSwaggerUi(); // Sirve el UI en /swagger
+app.MapGet("/", () => Results.Redirect("/MemoriaAPI/swagger/index.html"));
+
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())   //Linea para que la app funcione en desarrollo y produccion. 
+{
+    app.UseOpenApi(); // Sirve /swagger/v1/swagger.json
+    app.UseSwaggerUi();
+}
+
+
 
 app.UseCors(MyAllowSpecificOrigins); 
 
