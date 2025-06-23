@@ -82,6 +82,10 @@ namespace MemoriaAPI.Models
         public int Orden { get; set; }
     }
 
+
+
+
+
     public class Seccion
     {
         [Key]
@@ -104,6 +108,10 @@ namespace MemoriaAPI.Models
         public int Orden { get; set; }
     }
 
+
+
+
+
     public class Contenido
     {
         [Key]
@@ -122,6 +130,10 @@ namespace MemoriaAPI.Models
 
         public DateTime FechaPublicacion { get; set; }
     }
+
+
+
+
 
     public class Usuario
     {

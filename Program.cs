@@ -6,8 +6,13 @@ using Microsoft.Data.SqlClient;
 using MemoriaAPI.Models;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using Microsoft.AspNetCore.Builder;
+using Serilog;
 using MemoriaAPI.Services;
+using MemoriaAPI.Service;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,17 +20,34 @@ var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://192.168.237.187:5010", "https://192.168.237.187:4435", "https://localhost", "https://webprueba", "https://www.tribcuentasmendoza.gob.ar")
+            policy.AllowAnyOrigin()
+            //policy.WithOrigins("https://localhost", "https://webprueba", "https://www.tribcuentasmendoza.gob.ar")
                    .AllowAnyHeader()
                   .AllowAnyMethod();
         });
 });
 
+
+
+// Configurar Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/startup-log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+
+builder.Host.UseSerilog();
 
 var connectionString = builder.Configuration.GetConnectionString("FallosDb");
 
@@ -39,6 +61,11 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IFallosService, FallosService>();
 builder.Services.AddScoped<IConfiguracionService, ConfiguracionService>();
 builder.Services.AddScoped<IHomeService, HomeService>();
+builder.Services.AddScoped<ISeccionService, SeccionService>();
+builder.Services.AddScoped<IPaginaService, PaginaService>();
+builder.Services.AddScoped<IContenidoService, ContenidoService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddOpenApiDocument(config =>
@@ -55,6 +82,32 @@ builder.Services.AddOpenApiDocument(config =>
 
     config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
 });
+
+
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidateAudience = true,
+        ValidAudience = jwtSettings["Audience"],
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateLifetime = true
+    };
+});
+
+
+
 
 var app = builder.Build();
 
@@ -73,8 +126,12 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine("❌ Error al conectar a la base de datos: " + ex.Message);
-    throw;
+    Log.Fatal(ex, "❌ La aplicación no pudo iniciarse correctamente.");
+    return;
+}
+finally
+{
+    Log.CloseAndFlush();
 }
 
 
@@ -96,8 +153,9 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())   //Linea
 
 
 
-app.UseCors(MyAllowSpecificOrigins); 
+app.UseCors(MyAllowSpecificOrigins);
 
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();

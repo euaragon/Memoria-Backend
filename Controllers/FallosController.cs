@@ -11,10 +11,13 @@ namespace MemoriaAPI.Controllers
     public class FallosController : ControllerBase
     {
         private readonly IFallosService _fallosService;
+        private readonly HttpClient _httpClient;
+        
 
-        public FallosController(IFallosService fallosService)
+        public FallosController(IFallosService fallosService, HttpClient httpClient)
         {
             _fallosService = fallosService;
+            _httpClient = httpClient;
         }
 
         [HttpGet("fallos2024/todos")]
@@ -108,6 +111,28 @@ namespace MemoriaAPI.Controllers
             };
 
             return File(falloPdf.Archivo, falloPdf.ContentType ?? "application/pdf", falloPdf.NombreArchivo ?? "fallo.pdf");
+        }
+
+        
+
+       
+        [HttpGet("audExt")]
+        public async Task<IActionResult> GetAuditoriaExterna()
+        {
+            var externalUrl = "https://www.tribcuentasmendoza.gob.ar/Memoria/2024/sample-data/audExt.json";
+
+            try
+            {
+                var response = await _httpClient.GetAsync(externalUrl);
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+
+                return Content(content, "application/json");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al acceder a los datos externos: {ex.Message}");
+            }
         }
     }
 }

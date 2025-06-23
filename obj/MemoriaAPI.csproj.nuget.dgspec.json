@@ -49,6 +49,10 @@
               "target": "Package",
               "version": "[2.1.66, )"
             },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.17, )"
+            },
             "Microsoft.Data.SqlClient": {
               "target": "Package",
               "version": "[6.0.1, )"
@@ -76,6 +80,10 @@
             "NSwag.AspNetCore": {
               "target": "Package",
               "version": "[14.4.0, )"
+            },
+            "Serilog.AspNetCore": {
+              "target": "Package",
+              "version": "[9.0.0, )"
             }
           },
           "imports": [
