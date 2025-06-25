@@ -1,4 +1,5 @@
 ﻿using MemoriaAPI.Models;
+using MemoriaAPI.Models.DTO;
 
 namespace MemoriaAPI.Service
 {
@@ -6,8 +7,8 @@ namespace MemoriaAPI.Service
     {
         Task<IEnumerable<Pagina>> GetAllAsync();
         Task<Pagina?> GetByIdAsync(int id);
-        Task<Pagina> CreateAsync(Pagina pagina);
-        Task<bool> UpdateAsync(int id, Pagina pagina);
+        Task<Pagina> CreateAsync(PaginaCreateUpdateDTO paginaDto);
+        Task<bool> UpdateAsync(int id, PaginaCreateUpdateDTO paginaDto);
         Task<bool> DeleteAsync(int id);
     }
 }

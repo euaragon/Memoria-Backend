@@ -1,7 +1,6 @@
-﻿using MemoriaAPI.Models;
+﻿using MemoriaAPI.Models.DTO; // --> ¡Importante! Añadir el using para los DTOs
 using MemoriaAPI.Service;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace MemoriaAPI.Controllers
 {
@@ -18,23 +17,42 @@ namespace MemoriaAPI.Controllers
             _logger = logger;
         }
 
+        // --- GET ALL ---
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Seccion>>> Get()
+        // --> El método ahora devuelve una lista de DTOs, no el modelo de BD.
+        public async Task<ActionResult<IEnumerable<SeccionDTO>>> Get()
         {
             _logger.LogInformation("🔍 [GET] api/seccion llamado.");
-
             var secciones = await _service.GetAllAsync();
 
-            _logger.LogInformation("📦 {Cantidad} secciones recuperadas.", secciones.Count());
+            // --> Mapeamos la lista de modelos a una lista de DTOs antes de enviarla.
+            var seccionesDto = secciones.Select(s => new SeccionDTO
+            {
+                IdSeccion = s.IdSeccion,
+                Nombre = s.Nombre,
+                Url = s.Url,
+                Orden = s.Orden,
+                IconoCss = s.IconoCss,
+                NombreEnsamblado = s.NombreEnsamblado,
+                Paginas = s.Paginas.Select(p => new PaginaDTO
+                {
+                    IdPagina = p.IdPagina,
+                    Nombre = p.Nombre,
+                    Url = p.Url,
+                    Orden = p.Orden
+                }).ToList()
+            });
 
-            return Ok(secciones);
+            _logger.LogInformation("📦 {Cantidad} secciones recuperadas.", seccionesDto.Count());
+            return Ok(seccionesDto);
         }
 
+        // --- GET BY ID ---
         [HttpGet("{id}")]
-        public async Task<ActionResult<Seccion>> Get(int id)
+        // --> El método ahora devuelve un solo DTO.
+        public async Task<ActionResult<SeccionDTO>> Get(int id)
         {
             _logger.LogInformation("🔍 [GET] api/seccion/{Id} llamado.", id);
-
             var seccion = await _service.GetByIdAsync(id);
 
             if (seccion == null)
@@ -43,27 +61,61 @@ namespace MemoriaAPI.Controllers
                 return NotFound();
             }
 
-            return Ok(seccion);
+            // --> Mapeamos la entidad encontrada a un DTO.
+            var seccionDto = new SeccionDTO
+            {
+                IdSeccion = seccion.IdSeccion,
+                Nombre = seccion.Nombre,
+                Url = seccion.Url,
+                Orden = seccion.Orden,
+                IconoCss = seccion.IconoCss,
+                NombreEnsamblado = seccion.NombreEnsamblado,
+                Paginas = seccion.Paginas.Select(p => new PaginaDTO
+                {
+                    IdPagina = p.IdPagina,
+                    Nombre = p.Nombre,
+                    Url = p.Url,
+                    Orden = p.Orden
+                }).ToList()
+            };
+
+            return Ok(seccionDto);
         }
 
+        // --- POST ---
         [HttpPost]
-        public async Task<ActionResult<Seccion>> Post(Seccion seccion)
+        // --> El método ahora devuelve el DTO de lectura y recibe el DTO de escritura.
+        public async Task<ActionResult<SeccionDTO>> Post([FromBody] SeccionCreateUpdateDTO seccionDto)
         {
-            _logger.LogInformation("📥 [POST] api/seccion - Creando nueva sección: {Nombre}", seccion.Nombre);
+            _logger.LogInformation("📥 [POST] api/seccion - Creando nueva sección: {Nombre}", seccionDto.Nombre);
 
-            var nueva = await _service.CreateAsync(seccion);
+            // --> Pasamos el DTO al servicio, cumpliendo con el contrato de la interfaz.
+            var nuevaSeccion = await _service.CreateAsync(seccionDto);
 
-            _logger.LogInformation("✅ Sección creada con ID {IdSeccion}.", nueva.IdSeccion);
+            // --> Mapeamos la respuesta del servicio (que es un modelo) a un DTO para el cliente.
+            var nuevaSeccionDto = new SeccionDTO
+            {
+                IdSeccion = nuevaSeccion.IdSeccion,
+                Nombre = nuevaSeccion.Nombre,
+                Url = nuevaSeccion.Url,
+                Orden = nuevaSeccion.Orden,
+                IconoCss = nuevaSeccion.IconoCss,
+                NombreEnsamblado = nuevaSeccion.NombreEnsamblado
+            };
 
-            return CreatedAtAction(nameof(Get), new { id = nueva.IdSeccion }, nueva);
+            _logger.LogInformation("✅ Sección creada con ID {IdSeccion}.", nuevaSeccionDto.IdSeccion);
+            return CreatedAtAction(nameof(Get), new { id = nuevaSeccionDto.IdSeccion }, nuevaSeccionDto);
         }
 
+        // --- PUT ---
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Seccion seccion)
+        // --> El método ahora recibe el DTO de escritura.
+        public async Task<IActionResult> Put(int id, [FromBody] SeccionCreateUpdateDTO seccionDto)
         {
             _logger.LogInformation("✏️ [PUT] api/seccion/{Id} - Actualizando sección.", id);
 
-            var actualizado = await _service.UpdateAsync(id, seccion);
+            // --> Pasamos el DTO al servicio.
+            var actualizado = await _service.UpdateAsync(id, seccionDto);
 
             if (!actualizado)
             {
@@ -75,11 +127,12 @@ namespace MemoriaAPI.Controllers
             return NoContent();
         }
 
+        // --- DELETE ---
+        // Este método estaba perfecto y no necesita cambios.
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             _logger.LogInformation("🗑️ [DELETE] api/seccion/{Id} - Intentando eliminar sección.", id);
-
             var eliminado = await _service.DeleteAsync(id);
 
             if (!eliminado)

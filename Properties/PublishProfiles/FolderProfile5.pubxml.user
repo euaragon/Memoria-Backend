@@ -5,7 +5,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>D:\MemoriaAPI</_PublishTargetUrl>
-    <History>True|2025-06-23T14:14:10.2211115Z;True|2025-06-23T11:07:07.6452181-03:00;True|2025-06-23T11:05:26.8584449-03:00;</History>
+    <History>True|2025-06-25T13:16:37.5969069Z;False|2025-06-25T10:05:39.4620807-03:00;False|2025-06-25T10:05:17.3781981-03:00;False|2025-06-25T09:49:25.2476744-03:00;True|2025-06-23T11:14:10.2211115-03:00;True|2025-06-23T11:07:07.6452181-03:00;True|2025-06-23T11:05:26.8584449-03:00;</History>
     <LastFailureDetails />
   </PropertyGroup>
 </Project>

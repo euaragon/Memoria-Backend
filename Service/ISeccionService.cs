@@ -1,4 +1,5 @@
 ﻿using MemoriaAPI.Models;
+using MemoriaAPI.Models.DTO; // Asegúrate de que este using esté presente
 
 namespace MemoriaAPI.Service
 {
@@ -6,8 +7,13 @@ namespace MemoriaAPI.Service
     {
         Task<IEnumerable<Seccion>> GetAllAsync();
         Task<Seccion?> GetByIdAsync(int id);
-        Task<Seccion> CreateAsync(Seccion seccion);
-        Task<bool> UpdateAsync(int id, Seccion seccion);
+
+        // FIRMA CORREGIDA: Ahora usa el DTO, igual que en tu clase.
+        Task<Seccion> CreateAsync(SeccionCreateUpdateDTO seccionDto);
+
+        // FIRMA CORREGIDA: Ahora usa el DTO, igual que en tu clase.
+        Task<bool> UpdateAsync(int id, SeccionCreateUpdateDTO seccionDto);
+
         Task<bool> DeleteAsync(int id);
     }
 }

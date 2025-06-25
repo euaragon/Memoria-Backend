@@ -1,5 +1,6 @@
 ﻿using MemoriaAPI.Data;
 using MemoriaAPI.Models;
+using MemoriaAPI.Models.DTO;
 using Microsoft.EntityFrameworkCore;
 
 namespace MemoriaAPI.Service
@@ -25,32 +26,38 @@ namespace MemoriaAPI.Service
             return await _context.Paginas.FindAsync(id);
         }
 
-        public async Task<Pagina> CreateAsync(Pagina pagina)
+
+        public async Task<Pagina> CreateAsync(PaginaCreateUpdateDTO paginaDto)
         {
-            _context.Paginas.Add(pagina);
+            var nuevaPagina = new Pagina
+            {
+                Nombre = paginaDto.Nombre,
+                Url = paginaDto.Url,
+                Orden = paginaDto.Orden,
+                SeccionId = paginaDto.SeccionId // Asignamos la relación
+            };
+
+            _context.Paginas.Add(nuevaPagina);
             await _context.SaveChangesAsync();
-            return pagina;
+            return nuevaPagina;
         }
 
-        public async Task<bool> UpdateAsync(int id, Pagina pagina)
+        public async Task<bool> UpdateAsync(int id, PaginaCreateUpdateDTO paginaDto)
         {
-            if (id != pagina.IdPagina)
+            var paginaExistente = await _context.Paginas.FindAsync(id);
+
+            if (paginaExistente == null)
+            {
                 return false;
-
-            _context.Entry(pagina).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-                return true;
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _context.Paginas.AnyAsync(p => p.IdPagina == id))
-                    return false;
 
-                throw;
-            }
+            paginaExistente.Nombre = paginaDto.Nombre;
+            paginaExistente.Url = paginaDto.Url;
+            paginaExistente.Orden = paginaDto.Orden;
+            paginaExistente.SeccionId = paginaDto.SeccionId; // Permite mover la página a otra sección
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> DeleteAsync(int id)
